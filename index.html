@@ -15,8 +15,9 @@
         ::-webkit-scrollbar-thumb { background: #c0c0c0; border: 1px solid #000; box-shadow: inset 1px 1px #fff; }
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
+        .marquee-container { width: 100%; overflow: hidden; white-space: nowrap; }
+        .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        .animate-marquee { animation: marquee 15s linear infinite; }
     </style>
 </head>
 <body>
@@ -45,9 +46,48 @@ const TableProperties = () => <svg xmlns="http://www.w3.org/2000/svg" width="16"
 const Cpu = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>;
 const Sparkles = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 5h4"/></svg>;
 const Newspaper = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>;
+const Landmark = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>;
+const Gem = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 18 3 22 9 12 22 2 9"/><path d="M11.62 21.64A1 1 0 0 1 12 22a1 1 0 0 1 .38-.36l9.62-12.64H2Z"/><line x1="6" y1="9" x2="18" y2="9"/><line x1="12" y1="22" x2="12" y2="9"/><line x1="6" y1="3" x2="12" y2="9"/><line x1="18" y1="3" x2="12" y2="9"/></svg>;
+
+// --- UI COMPONENTS ESTRATTI ---
+const Win95Window = ({ children, title, icon: Icon, className = "", onClose }) => (
+    <div className={`bg-[#c0c0c0] p-1 flex flex-col ${className} border-2 border-white border-r-black border-b-black shadow-md`}>
+        <div className="bg-[#000080] px-2 py-1 flex justify-between items-center mb-1 shrink-0 text-white font-bold text-sm border border-transparent">
+            <div className="flex items-center gap-2">{Icon && <Icon size={14}/>} <span>{title}</span></div>
+            {onClose && <button onClick={onClose} className="bg-[#c0c0c0] w-5 h-5 text-black text-[12px] font-bold flex items-center justify-center border-2 border-white border-r-black border-b-black active:border-black active:border-t-black active:border-l-black">×</button>}
+        </div>
+        <div className="flex-1 bg-[#c0c0c0] overflow-hidden flex flex-col min-h-0 text-black">{children}</div>
+    </div>
+);
+
+const RetroButton = ({ children, onClick, disabled, className="" }) => (
+    <button onClick={onClick} disabled={disabled} className={`w-full py-1 px-4 bg-[#c0c0c0] border-2 border-white border-r-black border-b-black active:border-black active:border-t-black active:border-l-black font-bold text-sm flex items-center justify-center gap-2 ${disabled ? 'text-gray-500' : 'text-black'} ${className}`}>{children}</button>
+);
+
+const RetroStat = ({ label, value, color="black" }) => (
+    <div className="flex justify-between border-b border-gray-400 pb-1 mb-1">
+        <span className="text-xs font-bold text-gray-700">{label}</span>
+        <span className="font-mono font-bold text-lg" style={{color}}>{value}</span>
+    </div>
+);
+
+const StockGraph = ({ history, trend }) => {
+    if (!history || history.length === 0) return null;
+    const min = Math.min(...history) * 0.9;
+    const max = Math.max(...history) * 1.1;
+    const range = (max - min) === 0 ? 1 : (max - min); 
+    const points = history.map((val, i) => `${(i / (history.length - 1)) * 100},${100 - ((val - min) / range) * 100}`).join(' ');
+    return (
+        <div className="w-full h-32 bg-black border-2 border-gray-600 p-1 relative">
+            <div className="absolute inset-0 grid grid-cols-4 grid-rows-4">{[...Array(16)].map((_, i) => <div key={i} className="border border-[#333333]"></div>)}</div>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full relative z-10"><polyline fill="none" stroke="#00ff00" strokeWidth="2" points={points}/></svg>
+            <div className="absolute top-1 left-1 text-[10px] text-white font-mono bg-black/50 px-1">{trend} MARKET</div>
+        </div>
+    );
+};
 
 const TheSuccessor = () => {
-  const apiKey = ""; // Inserisci qui la tua API key Gemini per il CDA
+  const apiKey = ""; 
 
   const [screen, setScreen] = useState('start');
   const [character, setCharacter] = useState(null);
@@ -64,6 +104,14 @@ const TheSuccessor = () => {
   const [companies, setCompanies] = useState([]);
   const [staff, setStaff] = useState({ cfo: null, coo: null, pr: null });
   
+  // NUOVO: Status Symbols (Beni di lusso per buff passivi)
+  const [luxuries, setLuxuries] = useState({
+      watch: false,
+      club: false,
+      jet: false,
+      island: false
+  });
+  
   const [marketTrend, setMarketTrend] = useState('FLAT'); 
   const [stockPrice, setStockPrice] = useState(10.00);
   const [stockHistory, setStockHistory] = useState([10.00, 10.00, 10.00, 10.00, 10.00]);
@@ -76,6 +124,8 @@ const TheSuccessor = () => {
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [showStaff, setShowStaff] = useState(false);
+  const [showBank, setShowBank] = useState(false); // NUOVO: Modal Banca
+  const [showLifestyle, setShowLifestyle] = useState(false); // NUOVO: Modal Lifestyle
   const [showNewsPopup, setShowNewsPopup] = useState(false);
   const [advisorData, setAdvisorData] = useState("");
   const [isAdvisorLoading, setIsAdvisorLoading] = useState(false);
@@ -85,7 +135,7 @@ const TheSuccessor = () => {
   const [target, setTarget] = useState(null);
   const logContainerRef = useRef(null);
 
-  const WIN_INCOME_CONDITION = 500;
+  const WIN_INCOME_CONDITION = 500; 
 
   const archetypes = {
     wyler: {
@@ -114,19 +164,6 @@ const TheSuccessor = () => {
     { name: "WEYLAND YUTANI", type: "Space" }, { name: "SOYLENT CORP", type: "Food" }
   ];
 
-  // --- FIX: generateNews definita ---
-  const generateNews = () => {
-    const sectors = ["Tech", "Pharma", "Defense", "Software", "Bio", "Science", "Space", "Food"];
-    const sector = sectors[Math.floor(Math.random() * sectors.length)];
-    const type = Math.random() > 0.5 ? 'BOOM' : 'CRASH';
-    const titles = {
-      BOOM: [`${sector} SECTOR SURGES`, `${sector} STOCKS SKYROCKET`, `ANALYSTS BULLISH ON ${sector}`],
-      CRASH: [`${sector} SECTOR COLLAPSE`, `${sector} MELTDOWN INCOMING`, `SELL-OFF IN ${sector}`]
-    };
-    const title = titles[type][Math.floor(Math.random() * titles[type].length)];
-    return { title, sector, type };
-  };
-
   useEffect(() => {
       if (logContainerRef.current) logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
   }, [logs]);
@@ -136,10 +173,24 @@ const TheSuccessor = () => {
       setLogs(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, text: `[${time}] ${msg}` }]);
   };
 
+  // --- CALCOLI DERIVATI PER IL RENDER ---
+  const getInterestRate = () => {
+      let baseRate = 0.05;
+      if (marketTrend === 'BULL') baseRate = 0.02;
+      if (marketTrend === 'BEAR') baseRate = 0.08;
+      // Wyler ha uno sconto sui tassi
+      if (character?.id === 'wyler') baseRate = Math.max(0.01, baseRate - 0.01);
+      return baseRate;
+  };
+
   const calculateFinancials = () => {
-      const interestRate = character?.id === 'wyler' ? 0.02 : 0.05;
+      const interestRate = getInterestRate();
       const monthlyInterest = debt * interestRate;
       const totalRevenue = companies.reduce((acc, c) => acc + c.revenue, 0);
+      
+      // Nuova stima COGS (25% dei ricavi)
+      const cogs = totalRevenue * 0.25; 
+      
       const opEx = companies.reduce((acc, c) => acc + (c.revenue * (c.optimized ? 0.2 : 0.4)), 0); 
       
       let staffCost = 0;
@@ -147,17 +198,17 @@ const TheSuccessor = () => {
       if (staff.coo) staffCost += staff.coo.salary;
       if (staff.pr) staffCost += staff.pr.salary;
 
-      const preTaxIncome = totalRevenue - monthlyInterest - opEx - staffCost;
+      const grossProfit = totalRevenue - cogs;
+      const ebit = grossProfit - opEx - staffCost;
+      const preTaxIncome = ebit - monthlyInterest;
       const tax = preTaxIncome > 0 ? preTaxIncome * 0.2 : 0; 
       const netIncome = preTaxIncome - tax;
       
       const assetsValue = companies.reduce((acc, c) => acc + (c.price || c.revenue * 5), 0) + cash;
       const equity = assetsValue - debt;
 
-      return { monthlyInterest, opEx, preTaxIncome, tax, netIncome, assetsValue, equity, totalRevenue };
+      return { totalRevenue, cogs, grossProfit, opEx, staffCost, ebit, monthlyInterest, preTaxIncome, tax, netIncome, assetsValue, equity };
   };
-
-  const financials = calculateFinancials();
 
   const getPortfolioStats = () => {
       return companies.reduce((acc, c) => {
@@ -167,28 +218,38 @@ const TheSuccessor = () => {
       }, { totalRevenue: 0, sectors: {} });
   };
   
-  // --- FIX: marketInfo e portfolioStats assegnati come variabili nel render ---
   const getMarketInfo = () => {
       if (character?.id === 'wyler') return { exchange: 'NYSE', currency: '$' };
       if (character?.id === 'jett') return { exchange: 'NASDAQ', currency: '$' };
       return { exchange: 'MARKET', currency: '$' };
   };
 
-  const marketInfo = getMarketInfo();
+  const financials = calculateFinancials();
   const portfolioStats = getPortfolioStats();
+  const marketInfo = getMarketInfo();
+  const currentDate = new Date(1999, turn - 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase();
+  const currentInterestRate = getInterestRate();
+  const maxLeverage = character?.id === 'grimani' ? 1500 : 500;
 
+  // Calcolo dei Buff Passivi
+  let passiveStressRelief = 0;
+  if (luxuries.watch) passiveStressRelief += 1;
+  if (luxuries.jet) passiveStressRelief += 5;
+  if (luxuries.island) passiveStressRelief += 15;
+
+  // --- AZIONI ---
   const startGame = (charKey) => {
       const char = archetypes[charKey];
       setCharacter(char); setCash(char.startCash); setDebt(char.startDebt); setStress(char.startStress);
       setLegalRisk(0); setCompanies([]); setTurn(1); setMarketTrend('FLAT'); setStockPrice(10.00);
       setStockHistory([10.00, 10.00, 10.00, 10.00, 10.00]); setStaff({ cfo: null, coo: null, pr: null });
+      setLuxuries({ watch: false, club: false, jet: false, island: false });
       setHasWon(false);
       setLogs([{ id: 'start-0', text: `LOGIN: ${char.name} // CONNECTED` }]); setScreen('game');
   };
 
   const handleScout = () => {
-      const debtLimit = character?.id === 'grimani' ? 1500 : 500;
-      if (debt > debtLimit) { addLog(`ERROR: DEBT EXCEEDS $${debtLimit}M LIMIT. REPAY DEBT.`); return; }
+      if (debt > maxLeverage) { addLog(`ERROR: DEBT EXCEEDS $${maxLeverage}M LIMIT. REPAY DEBT.`); return; }
       if (target) { addLog("TARGET BUFFER FULL"); return; }
       
       let scoutTrend = marketTrend;
@@ -201,7 +262,7 @@ const TheSuccessor = () => {
       const price = Math.floor((size * (Math.random() * 0.5 + 0.8)) * priceMult); 
       const revenue = Math.floor(price * (Math.random() * 0.15 + 0.10)); 
 
-      setTarget({ name: `${base.name} ${Math.floor(Math.random()*99)}`, sector: base.type, price, revenue, optimized: false });
+      setTarget({ id: Date.now(), name: `${base.name} ${Math.floor(Math.random()*99)}`, sector: base.type, price, revenue, optimized: false });
       addLog(`SCAN: ${base.name} DETECTED`);
   };
 
@@ -211,7 +272,7 @@ const TheSuccessor = () => {
           if (cash >= target.price) { setCash(c => c - target.price); completeAcquisition(target); } 
           else addLog("ERROR: INSUFFICIENT CASH");
       } else {
-          if (debt + target.price <= (character.id === 'grimani' ? 1500 : 500)) { setDebt(d => d + target.price); completeAcquisition(target); } 
+          if (debt + target.price <= maxLeverage) { setDebt(d => d + target.price); completeAcquisition(target); } 
           else addLog("ERROR: CREDIT LIMIT EXCEEDED");
       }
   };
@@ -242,20 +303,31 @@ const TheSuccessor = () => {
       }
   };
 
-  const handleRelax = (type) => {
-      if (type === 'small') {
-          if (cash >= 2) { setCash(c => c - 2); setStress(s => Math.max(0, s - 15)); addLog("GOLF: STRESS -15"); } else addLog("INSUFFICIENT FUNDS");
-      } else if (type === 'big') {
-          if (cash >= 20) { setCash(c => c - 20); setStress(s => Math.max(0, s - 50)); addLog("YACHT: STRESS -50"); } else addLog("INSUFFICIENT FUNDS");
-      }
+  // AZIONI BANCA
+  const borrowMoney = () => {
+      if (debt + 50 > maxLeverage) { addLog(`BANK: CREDIT LINE REFUSED.`); return; }
+      setDebt(d => d + 50);
+      setCash(c => c + 50);
+      addLog(`BANK: BORROWED $50M AT ${(currentInterestRate*100).toFixed(1)}%`);
   };
 
-  const repayDebt = () => {
+  const repayDebt = (amount) => {
       if (debt <= 0) return;
-      if (cash <= 0) return;
-      const amount = Math.min(cash, 50, debt);
-      setCash(c => c - amount); setDebt(d => d - amount); setStress(s => Math.max(0, s - 2)); 
-      addLog(`REPAID $${amount.toFixed(1)}M DEBT`);
+      let actualRepay = Math.min(amount, cash, debt);
+      if (actualRepay <= 0) { addLog("BANK: INSUFFICIENT FUNDS"); return; }
+      
+      setCash(c => c - actualRepay); 
+      setDebt(d => d - actualRepay); 
+      setStress(s => Math.max(0, s - 2)); 
+      addLog(`BANK: REPAID $${actualRepay.toFixed(1)}M DEBT`);
+  };
+
+  // AZIONI LIFESTYLE
+  const purchaseLuxury = (item, cost, name) => {
+      if (cash < cost) { addLog("SHOP: INSUFFICIENT FUNDS"); return; }
+      setCash(c => c - cost);
+      setLuxuries(prev => ({ ...prev, [item]: true }));
+      addLog(`SHOP: PURCHASED ${name} FOR $${cost}M`);
   };
 
   const handleNewsDecision = (decision) => {
@@ -272,7 +344,7 @@ const TheSuccessor = () => {
       } else if (decision === 'BUY_MORE') {
           if (cash >= 50) {
               setCash(c => c - 50);
-              const newCo = { name: `QUICK ${activeNews.sector} ACQ.`, sector: activeNews.sector, revenue: activeNews.type === 'BOOM' ? 15 : 5, price: 50, optimized: false };
+              const newCo = { id: Date.now(), name: `QUICK ${activeNews.sector} ACQ.`, sector: activeNews.sector, revenue: activeNews.type === 'BOOM' ? 15 : 5, price: 50, optimized: false };
               setCompanies(prev => [...prev, newCo]); msg = `PANIC BOUGHT ASSET`;
           } else { msg = "INSUFFICIENT FUNDS"; }
       } else { msg = "POSITION HELD."; }
@@ -280,10 +352,11 @@ const TheSuccessor = () => {
       addLog(`STRATEGY: ${msg}`); setShowNewsPopup(false); setActiveNews(null);
   };
 
-  const sellAsset = (index) => {
-      const company = companies[index];
+  const sellAsset = (id) => {
+      const company = companies.find(c => c.id === id);
+      if (!company) return;
       const saleValue = Math.floor(company.revenue * (marketTrend === 'BULL' ? 12 : marketTrend === 'BEAR' ? 5 : 8));
-      setCash(c => c + saleValue); setCompanies(companies.filter((_, i) => i !== index)); addLog(`SOLD ${company.name} FOR $${saleValue}M`);
+      setCash(c => c + saleValue); setCompanies(companies.filter((c) => c.id !== id)); addLog(`SOLD ${company.name} FOR $${saleValue}M`);
   };
 
   const hireStaff = (role) => {
@@ -310,11 +383,13 @@ const TheSuccessor = () => {
   };
 
   const nextTurn = () => {
-      const currentFins = calculateFinancials();
-      const net = currentFins.netIncome;
-      
+      const net = financials.netIncome;
       setCash(prev => prev + net);
-      if (staff.pr) setStress(s => Math.max(0, s - staff.pr.skill));
+      
+      // Calcolo Stress (Staff PR + Buff Passivi)
+      let stressRelief = passiveStressRelief;
+      if (staff.pr) stressRelief += staff.pr.skill;
+      setStress(s => Math.max(0, s - stressRelief));
 
       setStress(s => s + 5); 
       setLegalRisk(r => Math.max(0, r - 2)); 
@@ -322,12 +397,25 @@ const TheSuccessor = () => {
       
       addLog(`CYCLE END: NET ${net >= 0 ? '+' : ''}$${net.toFixed(1)}M`);
       
+      // Club Intel Passivo
+      if (luxuries.club && Math.random() < 0.20 && !insiderIntel) {
+          const trends = ['BULL', 'BEAR', 'FLAT'];
+          const intel = trends[Math.floor(Math.random() * trends.length)];
+          setInsiderIntel(intel);
+          addLog("CLUB: OVERHEARD INSIDER INTEL", "success");
+      }
+
+      // Market Logic
       if (insiderIntel) { setMarketTrend(insiderIntel); setInsiderIntel(null); }
       else if (Math.random() < 0.2) setMarketTrend(['BULL', 'BEAR', 'FLAT'][Math.floor(Math.random()*3)]);
 
-      // --- FIX: generateNews() chiamata correttamente ---
-      const news = generateNews();
-      setActiveNews(news);
+      if (Math.random() > 0.3) {
+          const sectors = ["Tech", "Pharma", "Defense", "Software", "Bio", "Science", "Space", "Food"];
+          const sector = sectors[Math.floor(Math.random() * sectors.length)];
+          const type = Math.random() > 0.5 ? 'BOOM' : 'CRASH';
+          const title = type === 'BOOM' ? `${sector} SECTOR RALLY` : `${sector} BUBBLE BURSTS`;
+          setActiveNews({ title, sector, type });
+      } else { setActiveNews(null); }
       
       let vol = (Math.random() * 0.1) - 0.05;
       if (marketTrend === 'BULL') vol += 0.05; if (marketTrend === 'BEAR') vol -= 0.05;
@@ -344,15 +432,11 @@ const TheSuccessor = () => {
 
       if (net >= WIN_INCOME_CONDITION && !hasWon) {
           setScreen('win');
-          return;
       }
-
-      if (stress >= 100 || cash < -100 || legalRisk >= 100) setScreen('gameover');
   };
 
   const getAIAdvice = async () => {
       if (!character) return;
-      if (!apiKey) { setAdvisorData("API KEY NON CONFIGURATA.\nInserisci la tua Gemini API key nel codice sorgente per attivare il CDA."); return; }
       setIsAdvisorLoading(true); setAdvisorData("");
       try {
           const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -364,28 +448,7 @@ const TheSuccessor = () => {
       } catch (e) { setAdvisorData("LINK ERROR."); } finally { setIsAdvisorLoading(false); }
   };
 
-  const currentDate = new Date(1999, turn - 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase();
-
-  // --- UI COMPONENTS ---
-  const Win95Window = ({ children, title, icon: Icon, className = "", onClose }) => (
-    <div className={`bg-[#c0c0c0] p-1 flex flex-col ${className} border-2 border-white border-r-black border-b-black shadow-[4px_4px_0px_rgba(0,0,0,0.5)]`}>
-        <div className="bg-[#000080] px-2 py-1 flex justify-between items-center mb-1 shrink-0 text-white font-bold text-sm">
-            <div className="flex items-center gap-2">{Icon && <Icon size={14}/>} <span>{title}</span></div>
-            {onClose && <button onClick={onClose} className="bg-[#c0c0c0] w-4 h-4 text-black text-[10px] flex items-center justify-center border border-white border-r-black border-b-black">×</button>}
-        </div>
-        <div className="flex-1 bg-[#c0c0c0] overflow-hidden flex flex-col min-h-0 text-black">{children}</div>
-    </div>
-  );
-
-  const RetroButton = ({ children, onClick, disabled, className="" }) => (
-      <button onClick={onClick} disabled={disabled} className={`w-full py-1 px-4 bg-[#c0c0c0] border-2 border-white border-r-black border-b-black active:border-black active:border-t-black font-bold text-sm flex items-center justify-center gap-2 ${disabled ? 'text-gray-500' : 'text-black'} ${className}`}>{children}</button>
-  );
-
-  const RetroStat = ({ label, value, color="black" }) => (
-      <div className="flex justify-between border-b border-gray-400 pb-1 mb-1"><span className="text-xs font-bold text-gray-700">{label}</span><span className="font-mono font-bold text-lg" style={{color}}>{value}</span></div>
-  );
-
-  const StaffCard = ({ role, data }) => (
+  const StaffCardHelper = ({ role, data }) => (
       <div className="border border-gray-500 p-2 mb-2 bg-white">
           <div className="flex justify-between font-bold border-b border-gray-300 mb-1">
               <span>{role.toUpperCase()}</span>
@@ -400,18 +463,13 @@ const TheSuccessor = () => {
       </div>
   );
 
-  const StockGraph = () => {
-    const min = Math.min(...stockHistory) * 0.9;
-    const range = (Math.max(...stockHistory) * 1.1) - min;
-    const points = stockHistory.map((val, i) => `${(i / (stockHistory.length - 1)) * 100},${100 - ((val - min) / range) * 100}`).join(' ');
-    return (
-        <div className="w-full h-32 bg-black border-2 border-gray-600 p-1 relative">
-            <div className="absolute inset-0 grid grid-cols-4 grid-rows-4">{[...Array(16)].map((_, i) => <div key={i} className="border border-[#333333]"></div>)}</div>
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full relative z-10"><polyline fill="none" stroke="#00ff00" strokeWidth="2" points={points}/></svg>
-            <div className="absolute top-1 left-1 text-[10px] text-white font-mono bg-black/50 px-1">{marketTrend} MARKET</div>
-        </div>
-    );
-  };
+  // Watcher per Game Over / Vittoria
+  useEffect(() => {
+      if (screen !== 'game') return;
+      if (stress >= 100 || cash <= -100 || legalRisk >= 100) {
+          setScreen('gameover');
+      }
+  }, [stress, cash, legalRisk, screen]);
 
   // --- RENDER ---
   if (screen === 'start') {
@@ -425,8 +483,8 @@ const TheSuccessor = () => {
                   <div className="grid md:grid-cols-3 gap-4 p-4">
                       {Object.values(archetypes).map(char => (
                           <div key={char.id} className="border-2 border-white border-r-gray-600 border-b-gray-600 p-4 flex flex-col justify-between bg-[#c0c0c0]">
-                              <div><div className="bg-[#000080] text-white p-1 text-center font-bold text-sm mb-4">{char.role}</div><div className="text-center font-bold mb-2 text-lg">{char.name}</div><p className="text-sm italic mb-4">{char.desc}</p>
-                              <div className="mb-4 bg-white border border-gray-500 p-2 text-xs"><span className="font-bold block mb-1">SPECIAL: {char.ability}</span><span className="text-gray-600">{char.abilityDesc}</span></div></div>
+                              <div><div className="bg-[#000080] text-white p-1 text-center font-bold text-sm mb-4 border border-black border-t-gray-500 border-l-gray-500">{char.role}</div><div className="text-center font-bold mb-2 text-lg">{char.name}</div><p className="text-sm italic mb-4">{char.desc}</p>
+                              <div className="mb-4 bg-white border border-gray-500 border-r-white border-b-white p-2 text-xs"><span className="font-bold block mb-1">SPECIAL: {char.ability}</span><span className="text-gray-600">{char.abilityDesc}</span></div></div>
                               <RetroButton onClick={() => startGame(char.id)}>SYSTEM LOGIN</RetroButton>
                           </div>
                       ))}
@@ -440,10 +498,10 @@ const TheSuccessor = () => {
       return (
           <div className="min-h-screen bg-[#008080] flex items-center justify-center p-4 font-sans text-sm">
               <Win95Window title="VICTORY.EXE" icon={Briefcase} className="max-w-2xl w-full">
-                  <div className="p-8 bg-white text-center">
+                  <div className="p-8 bg-white text-center border-2 border-gray-500 border-r-white border-b-white m-1">
                       <h1 className="text-4xl font-bold mb-2 text-[#000080] border-b-4 border-black pb-4">OBIETTIVO RAGGIUNTO</h1>
                       <p className="text-lg mb-6 font-bold text-gray-800 mt-4">Congratulazioni, {character.name}.<br/>Hai superato i $500M di profitto netto mensile. Il mercato è tuo.</p>
-                      <div className="bg-[#c0c0c0] border-2 border-white border-r-gray-600 border-b-gray-600 p-4 mb-6 shadow-inner text-left font-mono">
+                      <div className="bg-[#c0c0c0] border-2 border-gray-500 border-r-white border-b-white p-4 mb-6 text-left font-mono">
                           <div className="text-xs font-bold text-gray-600 mb-2 border-b border-gray-400 pb-1">DATI DI FINE SCALATA</div>
                           <div className="grid grid-cols-2 gap-y-2">
                               <div><span className="text-gray-600">PROFITTO NETTO:</span></div><div className="font-bold text-blue-800 text-right">+${financials.netIncome.toFixed(1)}M / mese</div>
@@ -459,7 +517,7 @@ const TheSuccessor = () => {
                           <p className="font-bold text-[#000080] text-lg mt-1">Mattia Ragnacci</p>
                       </div>
                       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                          <RetroButton onClick={() => { setHasWon(true); setScreen('game'); }} className="py-3 px-6 bg-green-200">PROSEGUI PARTITA (INFINITO)</RetroButton>
+                          <RetroButton onClick={() => { setHasWon(true); setScreen('game'); }} className="py-3 px-6 !bg-green-200">PROSEGUI PARTITA</RetroButton>
                           <RetroButton onClick={() => setScreen('start')} className="py-3 px-6">TORNA AL MENU INIZIALE</RetroButton>
                       </div>
                   </div>
@@ -471,10 +529,10 @@ const TheSuccessor = () => {
   if (screen === 'gameover') {
     return (
         <div className="min-h-screen bg-black flex items-center justify-center text-white font-mono text-center">
-            <div className="border-4 border-red-600 p-8 max-w-md w-full bg-[#000080] text-white">
+            <div className="border-4 border-red-600 p-8 max-w-md w-full bg-[#000080] text-white border-2 border-white border-r-gray-800 border-b-gray-800">
                 <h2 className="text-4xl font-bold mb-4 blink">FATAL ERROR</h2>
                 <p className="text-xl mb-8 uppercase">{legalRisk >= 100 ? "FBI RAID: ARRESTED" : stress >= 100 ? "SIGNAL LOST: CARDIAC ARREST" : "EXCEPTION: INSOLVENCY"}</p>
-                <button onClick={() => setScreen('start')} className="bg-[#c0c0c0] text-black border-2 border-white border-r-black border-b-black px-4 py-2 font-bold w-full active:border-black active:border-t-black">REBOOT SYSTEM</button>
+                <RetroButton onClick={() => setScreen('start')}>REBOOT SYSTEM</RetroButton>
             </div>
         </div>
     );
@@ -482,93 +540,128 @@ const TheSuccessor = () => {
 
   return (
       <div className="h-screen bg-[#008080] flex flex-col font-sans text-sm select-none">
-          <div className="bg-[#c0c0c0] p-1 flex justify-between items-center shrink-0 border-b-2 border-white border-r-black border-b-black">
+          <div className="bg-[#c0c0c0] p-1 flex justify-between items-center shrink-0 border-b-2 border-white border-r-gray-800 border-b-gray-800">
               <div className="flex gap-2 font-bold px-2"><span>{character.name}</span><span className="text-gray-600 hidden md:block">| {character.role}</span></div>
-              <div className="flex gap-2"><div className="bg-white border border-gray-500 px-2 font-bold text-green-700">{marketTrend}</div><div className="bg-white border border-gray-500 px-2">{currentDate}</div></div>
+              <div className="flex gap-2"><div className="bg-white border border-gray-500 px-2 font-bold text-green-700 inset-shadow">{marketTrend}</div><div className="bg-white border border-gray-500 px-2 inset-shadow">{currentDate}</div></div>
           </div>
 
           <div className="flex-1 p-2 grid grid-cols-12 gap-2 overflow-hidden">
+              {/* SINISTRA: Statistiche */}
               <aside className="col-span-12 md:col-span-3 flex flex-col gap-2 overflow-y-auto min-h-0">
                   <Win95Window title="Financials" icon={PieChart} className="shrink-0">
-                      <div className="p-2 cursor-pointer hover:bg-gray-100" onClick={()=>setShowFinancials(true)}>
+                      <div className="p-2 cursor-pointer hover:bg-gray-100 border border-transparent hover:border-gray-500" onClick={()=>setShowFinancials(true)} title="Click for Detailed Report">
                           <RetroStat label="CASH" value={`$${(cash || 0).toFixed(1)}M`} color="green"/>
                           <RetroStat label="DEBT" value={`$${debt.toFixed(1)}M`} color="red"/>
-                          <RetroStat label="REV" value={`+$${financials.netIncome.toFixed(1)}M`} color="blue"/>
-                          <div className="mt-2 pt-2 border-t border-gray-400">
-                               <button onClick={(e) => { e.stopPropagation(); repayDebt(); }} disabled={debt <= 0 || cash <= 0} className={`w-full py-1 text-xs font-bold border border-black ${debt <= 0 ? 'bg-gray-300 text-gray-500' : 'bg-red-200 text-red-900 active:bg-red-300'}`}>REPAY DEBT (MAX $50M)</button>
+                          <RetroStat label="NET REV" value={`+$${financials.netIncome.toFixed(1)}M`} color="blue"/>
+                          <div className="mt-2 pt-2 border-t border-gray-400 text-center">
+                               <span className="text-[10px] text-gray-500 font-bold">CLICK TO VIEW CONSOLIDATED REPORT</span>
                           </div>
                       </div>
                   </Win95Window>
                   
                   <Win95Window title="Vitals & Risk" icon={Activity} className="shrink-0">
                       <div className="p-2">
-                          <div className="text-xs font-bold">STRESS</div><div className="w-full bg-gray-300 h-2 mb-2 border border-black"><div className="bg-red-600 h-2" style={{width:`${Math.min(stress,100)}%`}}></div></div>
-                          <div className="mb-1 text-xs font-bold flex justify-between"><span>LEGAL RISK</span><span>{legalRisk}%</span></div><div className="w-full bg-gray-300 h-2 mb-2 border border-black"><div className="bg-black h-2" style={{width:`${Math.min(legalRisk,100)}%`}}></div></div>
+                          <div className="mb-1 text-xs font-bold flex justify-between"><span>STRESS</span><span>{Math.floor(stress)}%</span></div>
+                          <div className="w-full bg-gray-300 h-2 mb-2 border border-black border-r-white border-b-white"><div className="bg-red-600 h-2" style={{width:`${Math.min(stress,100)}%`}}></div></div>
+                          
+                          <div className="mb-1 text-xs font-bold flex justify-between"><span>LEGAL RISK</span><span>{Math.floor(legalRisk)}%</span></div>
+                          <div className="w-full bg-gray-300 h-2 mb-2 border border-black border-r-white border-b-white"><div className="bg-black h-2" style={{width:`${Math.min(legalRisk,100)}%`}}></div></div>
+                          
                           <div className="mt-2 border-t border-gray-400 pt-2">
                               <div className="text-[10px] font-bold text-gray-500 mb-1">SPECIAL ACTION</div>
-                              <button onClick={useCharacterAbility} className={`w-full py-2 px-2 text-left text-xs font-bold border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black mb-2 text-white ${character.id === 'wyler' ? 'bg-[#000080]' : character.id === 'jett' ? 'bg-purple-800' : 'bg-orange-700'}`}>★ {character.ability}</button>
+                              <button onClick={useCharacterAbility} className={`w-full py-2 px-2 text-left text-xs font-bold border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-white ${character.id === 'wyler' ? 'bg-[#000080]' : character.id === 'jett' ? 'bg-purple-800' : 'bg-orange-700'}`}>★ {character.ability}</button>
                           </div>
-                          <RetroButton onClick={()=>handleRelax('small')}>GOLF (-$2M)</RetroButton>
-                          <RetroButton onClick={()=>handleRelax('big')}>GALA (-$20M)</RetroButton>
+                          
+                          <div className="mt-2 border-t border-gray-400 pt-2">
+                             <div className="text-[10px] font-bold text-gray-500 mb-1">PASSIVE BUFFS</div>
+                             <div className="flex justify-between text-xs"><span>Luxuries Owned:</span><b>{Object.values(luxuries).filter(Boolean).length}</b></div>
+                             <div className="flex justify-between text-xs text-green-700"><span>Stress Relief:</span><b>-{passiveStressRelief}/mo</b></div>
+                          </div>
                       </div>
                   </Win95Window>
               </aside>
 
+              {/* CENTRO: Mainframe e Log */}
               <section className="col-span-12 md:col-span-6 flex flex-col gap-2 relative min-h-0">
                   <Win95Window title="Mainframe" icon={LayoutDashboard} className="flex-1 min-h-0">
                       <div className="flex flex-col h-full">
-                          <div className="flex gap-2 p-2 border-b border-white bg-[#d4d0c8] shrink-0">
-                              <RetroButton onClick={handleScout} disabled={!!target || debt > (character?.id === 'grimani' ? 1500 : 500)}><Activity size={14}/> SCAN</RetroButton>
+                          <div className="flex gap-2 p-2 border-b border-white bg-[#c0c0c0] shrink-0 border-2 border-transparent border-b-gray-800">
+                              <RetroButton onClick={handleScout} disabled={!!target || debt > maxLeverage}><Activity size={14}/> SCAN</RetroButton>
                               <RetroButton onClick={nextTurn}><TrendingUp size={14}/> NEXT</RetroButton>
                               <RetroButton onClick={useInsiderTrading} className="text-purple-900"><Skull size={14}/> INTEL</RetroButton>
                           </div>
-                          <div className="flex-1 bg-black border-2 border-gray-500 p-4 relative flex items-center justify-center overflow-hidden">
+                          <div className="flex-1 bg-black border-2 border-gray-600 border-r-white border-b-white p-4 relative flex items-center justify-center overflow-hidden m-1">
                               {!target ? <div className="text-[#00ff00] text-center font-mono opacity-50 blink"><Building size={48} className="mx-auto mb-2"/><p>AWAITING TARGET...</p></div> : 
-                              <div className="bg-[#c0c0c0] border-2 border-white border-r-black border-b-black p-1 w-full max-w-[95%]">
-                                  <div className="bg-[#000080] text-white px-2 py-1 font-bold flex justify-between text-xs mb-1"><span>Target Acquired</span><button onClick={()=>setTarget(null)}>×</button></div>
+                              <div className="bg-[#c0c0c0] border-2 border-white border-r-gray-800 border-b-gray-800 p-1 w-full max-w-[95%] animate-in zoom-in shadow-md">
+                                  <div className="bg-[#000080] text-white px-2 py-1 font-bold flex justify-between text-xs mb-1"><span>Target Acquired</span><button onClick={()=>setTarget(null)} className="border border-white border-r-gray-500 border-b-gray-500 bg-[#c0c0c0] text-black h-4 w-4 flex items-center justify-center">×</button></div>
                                   <div className="p-4 text-center">
-                                      <h2 className="text-2xl font-black font-mono mb-2 text-green-900 bg-white border-2 border-gray-500 p-1 truncate">{target.name}</h2>
-                                      <div className="bg-black border border-white p-2 text-left font-mono text-xs text-green-500 mb-3 grid grid-cols-2 gap-1"><span>SECTOR:</span><span className="text-right">{target.sector}</span><span>PRICE:</span><span className="text-right">${target.price}M</span><span>REV:</span><span className="text-right">+${target.revenue}M</span></div>
-                                      <div className="flex gap-2"><RetroButton onClick={()=>handleBuy('cash')}>CASH</RetroButton><RetroButton onClick={()=>handleBuy('lbo')}>LBO</RetroButton></div>
+                                      <h2 className="text-2xl font-black font-mono mb-2 text-green-900 bg-white border-2 border-gray-600 border-r-white border-b-white p-1 truncate">{target.name}</h2>
+                                      <div className="bg-black border-2 border-gray-600 border-r-white border-b-white p-2 text-left font-mono text-xs text-green-500 mb-3 grid grid-cols-2 gap-1">
+                                          <span>SECTOR:</span><span className="text-right text-white font-bold">{target.sector}</span>
+                                          <span>PRICE:</span><span className="text-right text-white font-bold">${target.price}M</span>
+                                          <span>REV:</span><span className="text-right text-white font-bold">+${target.revenue}M/yr</span>
+                                          <span>OPEX:</span><span className="text-right text-red-500 font-bold">-${(target.revenue * 0.4).toFixed(1)}M/yr</span>
+                                      </div>
+                                      <div className="flex gap-2"><RetroButton onClick={()=>handleBuy('cash')}>CASH MERGER</RetroButton><RetroButton onClick={()=>handleBuy('lbo')}>LBO RAID</RetroButton></div>
                                   </div>
                               </div>}
                           </div>
                       </div>
                   </Win95Window>
-                  <Win95Window title="Log" icon={AlertCircle} className="h-32 shrink-0"><div ref={logContainerRef} className="bg-black text-green-500 font-mono text-xs p-2 h-full overflow-y-auto">{logs.map(l=><div key={l.id} className="border-b border-gray-800 pb-1 mb-1">{"> "}{l.text}</div>)}</div></Win95Window>
+                  <Win95Window title="System Log" icon={AlertCircle} className="h-32 shrink-0">
+                      <div ref={logContainerRef} className="bg-black text-green-500 font-mono text-xs p-2 m-1 h-full overflow-y-auto border-2 border-gray-600 border-r-white border-b-white">
+                          {logs.map(l=><div key={l.id} className="border-b border-gray-800 pb-1 mb-1">{"> "}{l.text}</div>)}
+                      </div>
+                  </Win95Window>
               </section>
 
+              {/* DESTRA: Portafoglio Aziende */}
               <aside className="col-span-12 md:col-span-3 flex flex-col gap-2 overflow-hidden min-h-0">
                   <Win95Window title={`Assets (${companies.length})`} icon={Briefcase} className="h-full">
-                      <div className="bg-white border-2 border-gray-500 h-full overflow-y-auto p-1 cursor-pointer relative group" onClick={()=>setShowPortfolioReport(true)}>
-                          <div className="absolute top-1 right-1 text-[9px] text-blue-800 bg-white px-1 border border-blue-800 z-10">VIEW</div>
-                          {companies.map((c,i)=><div key={i} className="hover:bg-blue-800 hover:text-white flex justify-between px-1 text-xs border-b border-dotted border-gray-300 group/row"><span>{c.name}</span><button onClick={(e)=>{e.stopPropagation();sellAsset(i)}} className="hidden group-hover/row:block bg-red-500 text-white px-1 ml-2">SELL</button></div>)}
+                      <div className="bg-white border-2 border-gray-500 border-r-white border-b-white h-full overflow-y-auto p-1 m-1 cursor-pointer relative group" onClick={()=>setShowPortfolioReport(true)} title="Click for Portfolio Report">
+                          <div className="absolute top-1 right-1 text-[9px] text-blue-800 bg-white px-1 border border-blue-800 z-10 hidden group-hover:block">VIEW</div>
+                          {companies.map((c, i)=>(
+                              <div key={c.id} className="hover:bg-blue-800 hover:text-white flex justify-between px-1 text-xs border-b border-dotted border-gray-300 group/row items-center py-1">
+                                  <span className="truncate pr-2">{c.name}</span>
+                                  <div className="flex gap-1 items-center">
+                                      <span className="font-mono text-green-700 group-hover/row:text-white">+${c.revenue}M</span>
+                                      <button onClick={(e)=>{e.stopPropagation(); sellAsset(c.id); }} className="hidden group-hover/row:block bg-red-500 text-white px-1 font-bold border border-red-900 border-b-black border-r-black">SELL</button>
+                                  </div>
+                              </div>
+                          ))}
                       </div>
                   </Win95Window>
               </aside>
           </div>
 
-          {/* --- FIX: classe animate-marquee invece di animate-[marquee_...] --- */}
-          <div className={`h-6 border-t border-b border-black flex items-center overflow-hidden shrink-0 cursor-pointer ${activeNews ? 'bg-red-600 text-white animate-pulse' : 'bg-black text-green-500'}`} onClick={() => { if(activeNews) setShowNewsPopup(true); }}>
-              <div className="whitespace-nowrap animate-marquee px-4 font-mono text-xs font-bold">
-                  {activeNews ? `+++ BREAKING: ${activeNews.title} +++ CLICK TO REACT +++` : `MARKET STABLE ... NO NEW ALERTS ... DOW JONES +0.4% ... NASDAQ +1.2% ...`}
+          {/* TICKER NOTIZIE */}
+          <div className={`h-6 border-t-2 border-b-2 border-white flex items-center overflow-hidden shrink-0 cursor-pointer ${activeNews ? 'bg-red-600 text-white' : 'bg-black text-green-500'}`} onClick={() => { if(activeNews) setShowNewsPopup(true); }}>
+              <div className="marquee-container">
+                  <div className={`marquee-content font-mono text-xs font-bold ${activeNews ? 'blink' : ''}`}>
+                      {activeNews ? `+++ BREAKING: ${activeNews.title} +++ CLICK TO REACT +++` : `MARKET STABLE ... NO NEW ALERTS ... DOW JONES +0.4% ... NASDAQ +1.2% ...`}
+                  </div>
               </div>
           </div>
 
+          {/* TASKBAR BASSA */}
           <div className="h-10 bg-[#c0c0c0] border-t-2 border-white flex items-center px-2 gap-2 shrink-0 relative z-40">
-              <button className="flex items-center gap-1 px-3 py-1 border-2 border-white border-r-black border-b-black active:border-t-black font-bold text-sm" onClick={()=>setShowSystemMenu(!showSystemMenu)}><Cpu size={16}/> SYSTEM</button>
+              <button className="flex items-center gap-1 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm" onClick={()=>setShowSystemMenu(!showSystemMenu)}><Cpu size={16}/> SYSTEM</button>
               <div className="border-l border-gray-400 h-6 mx-1"></div>
-              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-black border-b-black active:border-t-black font-bold text-sm" onClick={()=>setShowGraph(!showGraph)}><LineChart size={16}/> DATA</button>
-              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-black border-b-black active:border-t-black font-bold text-sm" onClick={()=>setShowStaff(!showStaff)}><Users size={16}/> STAFF</button>
+              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm" onClick={()=>setShowGraph(!showGraph)}><LineChart size={16}/> MARKET DATA</button>
+              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm" onClick={()=>setShowBank(!showBank)}><Landmark size={16}/> BANK</button>
               <div className="border-l border-gray-400 h-6 mx-1"></div>
-              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-black border-b-black active:border-t-black font-bold text-sm text-[#000080]" onClick={()=>setShowAdvisor(!showAdvisor)}><Sparkles size={16}/> CDA</button>
+              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm" onClick={()=>setShowStaff(!showStaff)}><Users size={16}/> STAFF</button>
+              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm" onClick={()=>setShowLifestyle(!showLifestyle)}><Gem size={16}/> LIFESTYLE</button>
+              <div className="border-l border-gray-400 h-6 mx-1"></div>
+              <button className="flex items-center gap-2 px-3 py-1 border-2 border-white border-r-gray-800 border-b-gray-800 active:border-gray-800 active:border-t-black active:border-l-black active:border-r-white active:border-b-white font-bold text-sm text-[#000080]" onClick={()=>setShowAdvisor(!showAdvisor)}><Sparkles size={16}/> CDA</button>
           </div>
 
-          {/* MODALS */}
+          {/* ========================================= MODALS ========================================= */}
+          
           {showSystemMenu && (
               <div className="absolute bottom-12 left-2 w-48 z-50">
                   <Win95Window title="SYSTEM" onClose={() => setShowSystemMenu(false)}>
-                      <div className="p-1">
+                      <div className="p-2 space-y-1">
                           <RetroButton onClick={() => { setScreen('start'); setShowSystemMenu(false); }}>REBOOT SYSTEM</RetroButton>
                           <RetroButton onClick={() => alert("Manuale non trovato (Error 404)")}>HELP</RetroButton>
                           <RetroButton onClick={() => setShowSystemMenu(false)}>CLOSE MENU</RetroButton>
@@ -579,8 +672,68 @@ const TheSuccessor = () => {
 
           {showStaff && (
               <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:left-40 md:translate-x-0 z-50 w-64">
-                  <Win95Window title="HR" icon={Users} onClose={()=>setShowStaff(false)}>
-                      <div className="p-2 space-y-2">{['cfo','coo','pr'].map(role=><StaffCard key={role} role={role} data={staff[role]}/>)}</div>
+                  <Win95Window title="HR_DEPARTMENT.EXE" icon={Users} onClose={()=>setShowStaff(false)}>
+                      <div className="p-2 space-y-2">
+                        <StaffCardHelper role="cfo" data={staff.cfo} />
+                        <StaffCardHelper role="coo" data={staff.coo} />
+                        <StaffCardHelper role="pr" data={staff.pr} />
+                      </div>
+                  </Win95Window>
+              </div>
+          )}
+
+          {/* MODAL BANCA */}
+          {showBank && (
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:left-20 md:translate-x-0 z-50 w-72">
+                  <Win95Window title="CORPORATE_BANK.EXE" icon={Landmark} onClose={() => setShowBank(false)}>
+                      <div className="p-2 bg-white m-1 border-2 border-gray-500 border-r-white border-b-white">
+                          <div className="text-center font-bold border-b border-gray-400 pb-2 mb-2">CREDIT LINE MANAGEMENT</div>
+                          <RetroStat label="MAX LEVERAGE" value={`$${maxLeverage}M`} color="black"/>
+                          <RetroStat label="CURRENT DEBT" value={`$${debt.toFixed(1)}M`} color="red"/>
+                          <div className="flex justify-between border-b border-gray-400 pb-1 mb-3">
+                              <span className="text-xs font-bold text-gray-700">INTEREST RATE</span>
+                              <span className={`font-mono font-bold text-lg ${currentInterestRate >= 0.05 ? 'text-red-600' : 'text-green-600'}`}>{(currentInterestRate*100).toFixed(1)}%</span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                              <RetroButton onClick={borrowMoney} disabled={debt + 50 > maxLeverage} className="!bg-green-100">BORROW $50M</RetroButton>
+                              <div className="grid grid-cols-2 gap-2">
+                                  <RetroButton onClick={() => repayDebt(50)} disabled={debt <= 0 || cash <= 0} className="!bg-red-100">REPAY $50M</RetroButton>
+                                  <RetroButton onClick={() => repayDebt(debt)} disabled={debt <= 0 || cash <= 0} className="!bg-red-100">REPAY ALL</RetroButton>
+                              </div>
+                          </div>
+                      </div>
+                  </Win95Window>
+              </div>
+          )}
+
+          {/* MODAL LIFESTYLE (STATUS SYMBOL) */}
+          {showLifestyle && (
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:left-60 md:translate-x-0 z-50 w-80">
+                  <Win95Window title="LIFESTYLE_CATALOG.EXE" icon={Gem} onClose={() => setShowLifestyle(false)}>
+                      <div className="p-2 bg-[#c0c0c0] h-64 overflow-y-auto m-1 border-2 border-white border-r-gray-500 border-b-gray-500">
+                          <div className="text-xs italic mb-2 text-center">Acquista beni per ridurre lo stress o ottenere vantaggi.</div>
+                          
+                          <div className="bg-white border border-gray-400 p-2 mb-2 flex justify-between items-center">
+                              <div><div className="font-bold">Gold Watch</div><div className="text-[10px] text-gray-600">Passive: -1 Stress/mo</div></div>
+                              {luxuries.watch ? <span className="text-green-700 font-bold text-xs">OWNED</span> : <button onClick={()=>purchaseLuxury('watch', 5, 'Gold Watch')} className="bg-[#c0c0c0] border-2 border-white border-r-black border-b-black px-2 py-1 text-xs font-bold font-mono">$5M</button>}
+                          </div>
+
+                          <div className="bg-white border border-gray-400 p-2 mb-2 flex justify-between items-center">
+                              <div><div className="font-bold">Exclusive Club</div><div className="text-[10px] text-gray-600">20% chance Free Intel</div></div>
+                              {luxuries.club ? <span className="text-green-700 font-bold text-xs">OWNED</span> : <button onClick={()=>purchaseLuxury('club', 25, 'Exclusive Club')} className="bg-[#c0c0c0] border-2 border-white border-r-black border-b-black px-2 py-1 text-xs font-bold font-mono">$25M</button>}
+                          </div>
+
+                          <div className="bg-white border border-gray-400 p-2 mb-2 flex justify-between items-center">
+                              <div><div className="font-bold">Private Jet</div><div className="text-[10px] text-gray-600">Passive: -5 Stress/mo</div></div>
+                              {luxuries.jet ? <span className="text-green-700 font-bold text-xs">OWNED</span> : <button onClick={()=>purchaseLuxury('jet', 50, 'Private Jet')} className="bg-[#c0c0c0] border-2 border-white border-r-black border-b-black px-2 py-1 text-xs font-bold font-mono">$50M</button>}
+                          </div>
+
+                          <div className="bg-white border border-gray-400 p-2 mb-2 flex justify-between items-center">
+                              <div><div className="font-bold">Private Island</div><div className="text-[10px] text-gray-600">Passive: -15 Stress/mo</div></div>
+                              {luxuries.island ? <span className="text-green-700 font-bold text-xs">OWNED</span> : <button onClick={()=>purchaseLuxury('island', 100, 'Private Island')} className="bg-[#c0c0c0] border-2 border-white border-r-black border-b-black px-2 py-1 text-xs font-bold font-mono">$100M</button>}
+                          </div>
+                      </div>
                   </Win95Window>
               </div>
           )}
@@ -588,14 +741,13 @@ const TheSuccessor = () => {
           {showGraph && (
               <div className="absolute bottom-12 left-1/2 -translate-x-1/2 md:left-20 md:translate-x-0 w-80 z-50">
                   <Win95Window title="FINANCIAL TERMINAL" icon={LineChart} onClose={() => setShowGraph(false)}>
-                      <div className="p-2 bg-black border-2 border-gray-600 text-green-500 font-mono text-xs">
+                      <div className="p-2 bg-black border-2 border-gray-600 text-green-500 font-mono text-xs m-1">
                           <div className="flex justify-between border-b border-green-800 pb-1 mb-2"><span>{marketInfo.exchange}</span><span>{currentDate}</span></div>
                           <div className="flex justify-between items-end mb-2">
                               <div><div className="text-[10px] text-green-700">LAST PRICE</div><div className="text-2xl font-bold">{marketInfo.currency}{stockPrice.toFixed(2)}</div></div>
                               <div className="text-right"><div className="text-[10px] text-green-700">SINCE IPO</div><div className={`text-lg font-bold ${stockPrice >= 10 ? 'text-green-400' : 'text-red-500'}`}>{((stockPrice - 10) * 10).toFixed(1)}%</div></div>
                           </div>
-                          <div className="relative h-32 border border-green-900 bg-black"><StockGraph /></div>
-                          <div className="mt-1 text-[10px] text-green-800 text-center">MARKET TREND: {marketTrend}</div>
+                          <StockGraph history={stockHistory} trend={marketTrend} />
                       </div>
                   </Win95Window>
               </div>
@@ -603,11 +755,14 @@ const TheSuccessor = () => {
 
           {showAdvisor && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                  <Win95Window title="CDA_MEETING.EXE" icon={Sparkles} onClose={() => setShowAdvisor(false)} className="max-w-md w-full shadow-2xl">
-                      <div className="p-6 bg-black border border-gray-700 text-green-400 font-mono text-sm leading-relaxed">
+                  <Win95Window title="CDA_MEETING.EXE" icon={Sparkles} onClose={() => setShowAdvisor(false)} className="max-w-md w-full">
+                      <div className="p-6 bg-black border-2 border-gray-600 border-r-white border-b-white m-1 text-green-400 font-mono text-sm leading-relaxed">
                           <div className="mb-4 border-b border-green-800 pb-2 flex justify-between"><span className="animate-pulse">● SECURE LINE</span><span>v9.0</span></div>
                           {isAdvisorLoading ? <div className="text-center py-8 animate-pulse">CONNECTING...</div> : (
-                              <div><p className="mb-4 whitespace-pre-line">{advisorData}</p><div className="mt-6 pt-4 border-t border-green-900 text-center"><RetroButton onClick={getAIAdvice} className="!w-auto inline-block">REQUEST MOTION</RetroButton></div></div>
+                              <div>
+                                  <p className="mb-4 whitespace-pre-line">{advisorData}</p>
+                                  <div className="mt-6 pt-4 border-t border-green-900 text-center"><RetroButton onClick={getAIAdvice} className="!w-auto inline-block">REQUEST MOTION</RetroButton></div>
+                              </div>
                           )}
                       </div>
                   </Win95Window>
@@ -616,10 +771,37 @@ const TheSuccessor = () => {
 
           {showFinancials && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-              <Win95Window title="CONSOLIDATED_REPORT.XLS" icon={FileText} onClose={() => setShowFinancials(false)} className="max-w-lg w-full shadow-2xl h-3/4">
-                 <div className="bg-white h-full overflow-y-auto p-6 font-mono text-xs text-black">
-                    <div className="text-center mb-6 border-b-2 border-black pb-2"><h2 className="text-xl font-bold">CONSOLIDATED FINANCIAL STATEMENTS</h2><p>Period: {currentDate}</p></div>
-                    <div className="mb-6"><h3 className="font-bold border-b border-gray-400 mb-2">INCOME STATEMENT</h3><div className="flex justify-between"><span>Revenue</span><span>${financials.totalRevenue.toFixed(2)}M</span></div><div className="flex justify-between text-red-800"><span>OpEx</span><span>(${financials.opEx.toFixed(2)}M)</span></div><div className="flex justify-between mt-2 border-t-2 border-black font-black"><span>NET INCOME</span><span>${financials.netIncome.toFixed(2)}M</span></div></div>
+              <Win95Window title="CONSOLIDATED_REPORT.XLS" icon={FileText} onClose={() => setShowFinancials(false)} className="max-w-lg w-full h-3/4">
+                 <div className="bg-white h-full overflow-y-auto p-6 m-1 border-2 border-gray-500 border-r-white border-b-white font-mono text-xs text-black">
+                    <div className="text-center mb-6 border-b-2 border-black pb-2">
+                        <h2 className="text-xl font-bold">CONSOLIDATED INCOME STATEMENT</h2>
+                        <p>Period: {currentDate}</p>
+                    </div>
+                    
+                    <div className="mb-6 space-y-1">
+                        <div className="flex justify-between font-bold"><span>Total Revenue</span><span>${financials.totalRevenue.toFixed(2)}M</span></div>
+                        <div className="flex justify-between text-red-800"><span>Cost of Revenue (COGS)</span><span>(${financials.cogs.toFixed(2)}M)</span></div>
+                        <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Gross Profit</span><span>${financials.grossProfit.toFixed(2)}M</span></div>
+
+                        <div className="pt-2"></div>
+                        <div className="flex justify-between text-red-800"><span>Operating Expenses (OpEx)</span><span>(${financials.opEx.toFixed(2)}M)</span></div>
+                        <div className="flex justify-between text-red-800"><span>SG&A (Staff Salaries)</span><span>(${financials.staffCost.toFixed(2)}M)</span></div>
+                        <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Operating Income (EBIT)</span><span>${financials.ebit.toFixed(2)}M</span></div>
+
+                        <div className="pt-2"></div>
+                        <div className="flex justify-between text-red-800"><span>Interest Expense (@ {(currentInterestRate*100).toFixed(1)}%)</span><span>(${financials.monthlyInterest.toFixed(2)}M)</span></div>
+                        <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Income Before Tax (EBT)</span><span>${financials.preTaxIncome.toFixed(2)}M</span></div>
+
+                        <div className="pt-2"></div>
+                        <div className="flex justify-between text-red-800"><span>Provision for Income Taxes (20%)</span><span>(${financials.tax.toFixed(2)}M)</span></div>
+
+                        <div className="flex justify-between mt-3 border-t-4 border-black pt-2 font-black text-lg">
+                            <span>NET INCOME</span>
+                            <span className={financials.netIncome >= 0 ? "text-blue-800" : "text-red-800"}>
+                                {financials.netIncome >= 0 ? '+' : '-'}${Math.abs(financials.netIncome).toFixed(2)}M
+                            </span>
+                        </div>
+                    </div>
                  </div>
               </Win95Window>
             </div>
@@ -627,23 +809,30 @@ const TheSuccessor = () => {
 
           {showPortfolioReport && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                  <Win95Window title="PORTFOLIO_ANALYSIS.TXT" icon={TableProperties} onClose={() => setShowPortfolioReport(false)} className="max-w-lg w-full shadow-2xl h-3/4">
-                      <div className="bg-white h-full overflow-y-auto p-6 font-mono text-xs text-black">
+                  <Win95Window title="PORTFOLIO_ANALYSIS.TXT" icon={TableProperties} onClose={() => setShowPortfolioReport(false)} className="max-w-lg w-full h-3/4">
+                      <div className="bg-white h-full overflow-y-auto p-6 m-1 border-2 border-gray-500 border-r-white border-b-white font-mono text-xs text-black">
                           <div className="text-center mb-6 border-b-2 border-black pb-2"><h2 className="text-xl font-bold">ASSET REPORT</h2><p>{currentDate}</p></div>
-                          <div className="mb-6"><h3 className="font-bold border-b border-gray-400 mb-2">SECTOR ALLOCATION</h3>{Object.entries(portfolioStats.sectors).map(([s,c])=><div key={s} className="flex justify-between"><span>{s}</span><span>{c}</span></div>)}</div>
+                          <div className="mb-6">
+                              <h3 className="font-bold border-b border-gray-400 mb-2">SECTOR ALLOCATION</h3>
+                              {Object.keys(portfolioStats.sectors).length === 0 ? <p>No assets acquired.</p> : null}
+                              {Object.entries(portfolioStats.sectors).map(([s,c])=><div key={s} className="flex justify-between"><span>{s}</span><span>{c} units</span></div>)}
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-gray-400 flex justify-between font-bold">
+                              <span>TOTAL PORTFOLIO REVENUE:</span><span>${portfolioStats.totalRevenue.toFixed(2)}M</span>
+                          </div>
                       </div>
                   </Win95Window>
               </div>
           )}
 
           {showNewsPopup && activeNews && (
-              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                  <Win95Window title="NEWSWIRE FLASH" icon={Newspaper} className="max-w-md w-full">
-                      <div className="p-4 bg-white text-black">
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                  <Win95Window title="NEWSWIRE FLASH" icon={Newspaper} onClose={() => setShowNewsPopup(false)} className="max-w-md w-full animate-in zoom-in">
+                      <div className="p-4 bg-white text-black m-1 border-2 border-gray-500 border-r-white border-b-white">
                           <h2 className="text-xl font-black mb-2 text-red-600 uppercase border-b-2 border-red-600">{activeNews.title}</h2>
                           <p className="mb-4 font-serif">Reports indicate a shift in <b>{activeNews.sector}</b>.</p>
                           <div className="grid grid-cols-3 gap-2">
-                              <RetroButton onClick={() => handleNewsDecision('SELL_ALL')}>SELL</RetroButton>
+                              <RetroButton onClick={() => handleNewsDecision('SELL_ALL')}>SELL ALL</RetroButton>
                               <RetroButton onClick={() => handleNewsDecision('BUY_MORE')}>BUY</RetroButton>
                               <RetroButton onClick={() => handleNewsDecision('WAIT')}>WAIT</RetroButton>
                           </div>
@@ -654,8 +843,8 @@ const TheSuccessor = () => {
 
           {activeEvent && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                  <Win95Window title="CRITICAL ALERT" icon={AlertTriangle} className="max-w-md w-full shadow-2xl">
-                      <div className="p-4 bg-[#c0c0c0]">
+                  <Win95Window title="CRITICAL ALERT" icon={AlertTriangle} className="max-w-md w-full">
+                      <div className="p-4 bg-[#c0c0c0] m-1 border-2 border-white border-r-gray-500 border-b-gray-500">
                           <h3 className="text-lg font-bold text-red-900 mb-1">{activeEvent.title}</h3>
                           <p className="text-sm text-black mb-4">{activeEvent.desc}</p>
                           <div className="space-y-2">{activeEvent.options.map((opt, i) => <RetroButton key={i} onClick={() => processEventOption(opt)}>{opt.label}</RetroButton>)}</div>
