@@ -6,15 +6,6 @@ A browser-based strategy game set in the **late 1990s** — the golden age of gr
 
 **[▶ PLAY NOW](https://mragnacci.github.io/Corporate-Game/)**
 
----
-
-## 📸 Screenshot
-
-<!-- Aggiungi uno screenshot qui dopo aver giocato! -->
-<!-- ![Gameplay Screenshot](<img width="1438" height="810" alt="Screenshot 2026-03-27 alle 11 36 26" src="https://github.com/user-attachments/assets/fc928567-73eb-4f67-bfaf-028b821e4258" />) -->
-
----
-
 ## 🎮 Gameplay
 
 Each turn represents one month. You must:
