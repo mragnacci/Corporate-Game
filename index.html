@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body { background-color: #008080; overflow: hidden; cursor: default; }
         ::-webkit-scrollbar { width: 12px; }
@@ -23,7 +23,7 @@
 <body>
 <div id="root"></div>
 
-<script type="text/babel">
+<script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef } = React;
 
 // --- ICONE INTEGRATE ---
@@ -50,11 +50,14 @@ const Landmark = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height
 const Gem = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 18 3 22 9 12 22 2 9"/><path d="M11.62 21.64A1 1 0 0 1 12 22a1 1 0 0 1 .38-.36l9.62-12.64H2Z"/><line x1="6" y1="9" x2="18" y2="9"/><line x1="12" y1="22" x2="12" y2="9"/><line x1="6" y1="3" x2="12" y2="9"/><line x1="18" y1="3" x2="12" y2="9"/></svg>;
 
 // --- UI COMPONENTS ESTRATTI ---
-const Win95Window = ({ children, title, icon: Icon, className = "", onClose }) => (
+const Win95Window = ({ children, title, icon: Icon, className = "", onClose, headerRight }) => (
     <div className={`bg-[#c0c0c0] p-1 flex flex-col ${className} border-2 border-white border-r-black border-b-black shadow-md`}>
         <div className="bg-[#000080] px-2 py-1 flex justify-between items-center mb-1 shrink-0 text-white font-bold text-sm border border-transparent">
             <div className="flex items-center gap-2">{Icon && <Icon size={14}/>} <span>{title}</span></div>
-            {onClose && <button onClick={onClose} className="bg-[#c0c0c0] w-5 h-5 text-black text-[12px] font-bold flex items-center justify-center border-2 border-white border-r-black border-b-black active:border-black active:border-t-black active:border-l-black">×</button>}
+            <div className="flex items-center gap-1">
+                {headerRight}
+                {onClose && <button onClick={onClose} className="bg-[#c0c0c0] w-5 h-5 text-black text-[12px] font-bold flex items-center justify-center border-2 border-white border-r-black border-b-black active:border-black active:border-t-black active:border-l-black">×</button>}
+            </div>
         </div>
         <div className="flex-1 bg-[#c0c0c0] overflow-hidden flex flex-col min-h-0 text-black">{children}</div>
     </div>
@@ -129,6 +132,8 @@ const TheSuccessor = () => {
   const [showFinancials, setShowFinancials] = useState(false); 
   const [showPortfolioReport, setShowPortfolioReport] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpPage, setHelpPage] = useState(0);
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [showStaff, setShowStaff] = useState(false);
   const [showBank, setShowBank] = useState(false); 
@@ -143,6 +148,14 @@ const TheSuccessor = () => {
   const logContainerRef = useRef(null);
 
   const WIN_INCOME_CONDITION = 500; 
+
+  const helpPages = [
+      { title: "1. THE GOAL", content: "Your objective is to reach $500M in Net Monthly Profit.\n\nBuild your corporate empire, but manage your Stress and keep Legal Risk under control to avoid Game Over." },
+      { title: "2. MAINFRAME", content: "Use SCAN to find target companies.\n\nPROCESS MONTH advances time, pays debt interest, and collects revenue.\n\nINSIDER INTEL accurately predicts the next market trend, but raises your Legal Risk." },
+      { title: "3. ACQUISITIONS", content: "CASH MERGER uses your liquid funds for a safe buyout.\n\nLBO RAID uses debt. Debt allows for aggressive expansion, but you must pay monthly interest.\n\nIf debt exceeds your leverage limit or cash drops below -$100M, you go bankrupt." },
+      { title: "4. SURVIVAL", content: "If Stress reaches 100%, you suffer a fatal heart attack.\n\nIf Legal Risk reaches 100%, the FBI raids your office.\n\nCheck the LIFESTYLE app to purchase luxury assets that passively reduce your stress every month." },
+      { title: "5. C-SUITE STAFF", content: "Open the STAFF app to hire executives.\n\nCFO: Reduces your debt interest rate.\nCOO: Boosts the total revenue of all your companies.\nPR: Reduces your monthly stress and helps spin scandals." }
+  ];
 
   const archetypes = {
     wyler: {
@@ -167,9 +180,56 @@ const TheSuccessor = () => {
   const archetypeKeys = Object.keys(archetypes);
 
   const companyNames = [
-    { name: "META CORTEX", type: "Tech" }, { name: "BLUE PILL PHARMA", type: "Pharma" }, { name: "CYBERDYNE", type: "Defense" },
-    { name: "ENCOM", type: "Software" }, { name: "TYRELL CORP", type: "Bio" }, { name: "MASSIVE DYNAMIC", type: "Science" },
-    { name: "WEYLAND YUTANI", type: "Space" }, { name: "SOYLENT CORP", type: "Food" }
+      // Real Crashes & Scandals (Gli Incubi degli anni 2000)
+      { name: "ENRON CORP", type: "Energy" }, { name: "WORLDCOM", type: "Telecom" }, { name: "LEHMAN BROTHERS", type: "Finance" },
+      { name: "PETS.COM", type: "Tech" }, { name: "GLOBAL CROSSING", type: "Telecom" }, { name: "WEBVAN", type: "Consumer" },
+      { name: "TYCO INTERNATIONAL", type: "Industrials" }, { name: "ADELPHIA", type: "Telecom" }, { name: "ETOYS.COM", type: "Tech" },
+      { name: "BOO.COM", type: "Tech" }, { name: "BEAR STEARNS", type: "Finance" }, { name: "WASHINGTON MUTUAL", type: "Finance" },
+      
+      // Tech & Software
+      { name: "MACROHARD SYSTEMS", type: "Tech" }, { name: "PEAR COMPUTING", type: "Tech" }, { name: "SYXCO NETWORKS", type: "Tech" },
+      { name: "PROPHET DATABASE", type: "Tech" }, { name: "INTEX SEMICONDUCTORS", type: "Tech" }, { name: "APEX LOGIC SOLUTIONS", type: "Tech" },
+      { name: "QUANTUM DYNAMICS", type: "Tech" }, { name: "NEXUS GRID", type: "Tech" }, { name: "PINNACLE COMPUTING", type: "Tech" },
+      { name: "SUNSPARK MICROSYSTEMS", type: "Tech" }, { name: "NETSPHERE", type: "Tech" }, { name: "DATACORE LOGIC", type: "Tech" },
+      { name: "OMNISEARCH", type: "Tech" }, { name: "NOVATECH", type: "Tech" }, { name: "CYBERSOFT", type: "Tech" }, { name: "BYTECORP", type: "Tech" },
+      
+      // Finance & Banking
+      { name: "METROGROUP FINANCIAL", type: "Finance" }, { name: "STERLING & SACHS", type: "Finance" }, { name: "MORTON STERLING", type: "Finance" },
+      { name: "LIBERTY TRUST & CO.", type: "Finance" }, { name: "OAKMONT FINANCIAL", type: "Finance" }, { name: "BANCORP HERITAGE", type: "Finance" },
+      { name: "J.T. MORGAN TRUST", type: "Finance" }, { name: "VANGUARDIA CAPITAL", type: "Finance" }, { name: "FIRST ATLANTIC BANK", type: "Finance" },
+      { name: "SUMMIT CAPITAL GROUP", type: "Finance" }, { name: "APEX WEALTH MGT", type: "Finance" }, { name: "TRUSTBANC HOLDINGS", type: "Finance" },
+      { name: "CAPITAL MUTUAL", type: "Finance" }, { name: "ELITE FINANCIAL", type: "Finance" },
+      
+      // Healthcare & Pharma
+      { name: "ZENITH PHARMA", type: "Pharma" }, { name: "JACKSON & JACKSON", type: "Pharma" }, { name: "MERCATOR LABS", type: "Pharma" },
+      { name: "BIOMEDICA GROUP", type: "Pharma" }, { name: "AEGIS THERAPEUTICS", type: "Pharma" }, { name: "VITALIS MEDICAL", type: "Pharma" },
+      { name: "UNITED HEALTHCARE SYS", type: "Pharma" }, { name: "MEDTECH SOLUTIONS", type: "Pharma" }, { name: "CAREPLUS GROUP", type: "Pharma" },
+      { name: "LIFESCIENCE LABS", type: "Pharma" }, { name: "HEALTHNET CORP", type: "Pharma" }, { name: "CUREGENETICS", type: "Pharma" },
+      { name: "APEX PHARMA", type: "Pharma" }, { name: "BIOGEN INNOVATIONS", type: "Pharma" }, { name: "NOVACURE", type: "Pharma" },
+      
+      // Energy & Raw Materials
+      { name: "HEXXON ENERGY", type: "Energy" }, { name: "CHEVRONEX", type: "Energy" }, { name: "PETROGLOBAL", type: "Energy" },
+      { name: "ATLAS ENERGY CORP", type: "Energy" }, { name: "POWERCORP INT.", type: "Energy" }, { name: "SUNPOWER GRID", type: "Energy" },
+      { name: "TERRAENERGY", type: "Energy" }, { name: "COREMINING HOLDINGS", type: "Energy" }, { name: "ATLANTIC PETROLEUM", type: "Energy" },
+      { name: "APEX ENERGY", type: "Energy" },
+      
+      // Telecom
+      { name: "AM-TEL", type: "Telecom" }, { name: "NOVACOM", type: "Telecom" }, { name: "TITAN NETWORKS", type: "Telecom" },
+      { name: "STARNET COMMUNICATIONS", type: "Telecom" }, { name: "LINKCOM", type: "Telecom" }, { name: "CONNECTCORP", type: "Telecom" },
+      { name: "TELNET GLOBAL", type: "Telecom" }, { name: "SIGNALCORP", type: "Telecom" },
+      
+      // Consumer, Retail & Media
+      { name: "VALUEMART STORES", type: "Consumer" }, { name: "KOLA-CO BEVERAGE", type: "Consumer" }, { name: "GLOBE WARNER MEDIA", type: "Consumer" },
+      { name: "MEGABUY RETAIL", type: "Consumer" }, { name: "SUMMIT BEVERAGE CO.", type: "Consumer" }, { name: "NILE RETAIL", type: "Consumer" },
+      { name: "CONSUMERCORP", type: "Consumer" }, { name: "SHOPNET", type: "Consumer" }, { name: "RETAILGIANT", type: "Consumer" },
+      { name: "FASTMARKET", type: "Consumer" }, { name: "URBAN OUTFITTERS GRP", type: "Consumer" }, { name: "FRESHFOODS INC", type: "Consumer" },
+      { name: "MEDIASTAR NETWORKS", type: "Consumer" }, { name: "APEX BROADCASTING", type: "Consumer" }, { name: "VISIONARY MEDIA", type: "Consumer" },
+      
+      // Industrials, Defense & Auto
+      { name: "GLOBAL ELECTRIC", type: "Industrials" }, { name: "AEROFLIGHT DYNAMICS", type: "Defense" }, { name: "HARRISON MOTORS", type: "Industrials" },
+      { name: "TITAN HEAVY INDUSTRIES", type: "Industrials" }, { name: "ORION AEROSPACE", type: "Defense" }, { name: "BUILDCORP CONSTRUCTION", type: "Industrials" },
+      { name: "AUTOGEN MANUFACTURING", type: "Industrials" }, { name: "STEELDYNAMICS", type: "Industrials" }, { name: "HEAVYMECH SOLUTIONS", type: "Industrials" },
+      { name: "APEX DEFENSE SYSTEMS", type: "Defense" }
   ];
 
   useEffect(() => {
@@ -208,9 +268,17 @@ const TheSuccessor = () => {
   };
 
   const calculateFinancials = () => {
-      const interestRate = getInterestRate();
-      const monthlyInterest = debt * interestRate;
-      const totalRevenue = companies.reduce((acc, c) => acc + c.revenue, 0);
+      const baseRate = getInterestRate();
+      const cfoBonusRate = staff.cfo ? staff.cfo.skill * 0.01 : 0;
+      const finalInterestRate = Math.max(0, baseRate - cfoBonusRate);
+      const baseInterest = debt * baseRate;
+      const cfoInterestSaved = debt * cfoBonusRate;
+      const monthlyInterest = debt * finalInterestRate;
+
+      let rawRevenue = companies.reduce((acc, c) => acc + c.revenue, 0);
+      let cooBonusRevenue = staff.coo ? rawRevenue * (staff.coo.skill * 0.02) : 0;
+      const totalRevenue = rawRevenue + cooBonusRevenue;
+
       const cogs = totalRevenue * 0.25; 
       const opEx = companies.reduce((acc, c) => acc + (c.revenue * (c.optimized ? 0.2 : 0.4)), 0); 
       
@@ -228,7 +296,12 @@ const TheSuccessor = () => {
       const assetsValue = companies.reduce((acc, c) => acc + (c.price || c.revenue * 5), 0) + cash;
       const equity = assetsValue - debt;
 
-      return { totalRevenue, cogs, grossProfit, opEx, staffCost, ebit, monthlyInterest, preTaxIncome, tax, netIncome, assetsValue, equity };
+      return { 
+          rawRevenue, cooBonusRevenue, totalRevenue, 
+          cogs, grossProfit, opEx, staffCost, ebit, 
+          baseRate, cfoBonusRate, finalInterestRate, baseInterest, cfoInterestSaved, monthlyInterest, 
+          preTaxIncome, tax, netIncome, assetsValue, equity 
+      };
   };
 
   const getPortfolioStats = () => {
@@ -249,7 +322,7 @@ const TheSuccessor = () => {
   const portfolioStats = getPortfolioStats();
   const marketInfo = getMarketInfo();
   const currentDate = new Date(1999, turn - 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase();
-  const currentInterestRate = getInterestRate();
+  const currentInterestRate = financials.finalInterestRate;
   const maxLeverage = character?.id === 'grimani' ? 1500 : 500;
 
   // Watcher per Game Over
@@ -289,14 +362,21 @@ const TheSuccessor = () => {
       let scoutTrend = marketTrend;
       if (insiderIntel) { scoutTrend = insiderIntel; setInsiderIntel(null); }
       
-      const base = companyNames[Math.floor(Math.random() * companyNames.length)];
+      // Filtra le aziende per assicurarsi di non pescare doppioni
+      const availableCompanies = companyNames.filter(cn => !companies.some(c => c.name === cn.name));
+      const base = availableCompanies.length > 0 ? availableCompanies[Math.floor(Math.random() * availableCompanies.length)] : companyNames[Math.floor(Math.random() * companyNames.length)];
+      
       const size = Math.floor(Math.random() * 200) + 50; 
       let priceMult = scoutTrend === 'BULL' ? 1.3 : scoutTrend === 'BEAR' ? 0.7 : 1;
+
+      let rating = 'FAIR VALUE';
+      if (priceMult > 1) rating = 'OVERPRICED';
+      if (priceMult < 1) rating = 'UNDERVALUED';
 
       const price = Math.floor((size * (Math.random() * 0.5 + 0.8)) * priceMult); 
       const revenue = Math.floor(price * (Math.random() * 0.15 + 0.10)); 
 
-      setTarget({ id: Date.now(), name: `${base.name} ${Math.floor(Math.random()*99)}`, sector: base.type, price, revenue, optimized: false });
+      setTarget({ id: Date.now(), name: base.name, sector: base.type, price, revenue, optimized: false, rating });
       addLog(`SCAN: ${base.name} DETECTED`);
   };
 
@@ -410,10 +490,13 @@ const TheSuccessor = () => {
   };
 
   const processEventOption = (option) => {
-      let s = { cash, stress, stockMultiplier: 1 };
+      let s = { cash, stress, legalRisk, stockMultiplier: 1, fireCFO: false, fireCOO: false, firePR: false };
       const msg = option.action(s);
-      setCash(s.cash); setStress(s.stress);
+      setCash(s.cash); setStress(s.stress); setLegalRisk(s.legalRisk);
       if (s.stockMultiplier !== 1) { setStockPrice(p => parseFloat((p * s.stockMultiplier).toFixed(2))); }
+      if (s.fireCFO) setStaff(prev => ({ ...prev, cfo: null }));
+      if (s.fireCOO) setStaff(prev => ({ ...prev, coo: null }));
+      if (s.firePR) setStaff(prev => ({ ...prev, pr: null }));
       addLog(`EVENT: ${msg}`); setActiveEvent(null);
   };
 
@@ -460,10 +543,27 @@ const TheSuccessor = () => {
       setStockPrice(newPrice); setStockHistory(prev => [...prev.slice(-19), newPrice]);
 
       if (Math.random() < 0.25 && !activeEvent) {
-          const events = [
+          let events = [
               { id: 1, title: "STRIKE ACTION", desc: "Workers demanding raise.", options: [{ label: "GRANT RAISE", action: (s) => { s.stress -= 5; return "DEAL REACHED"; } }, { label: "SEND SECURITY", action: (s) => { s.cash -= 5; s.stress += 10; return "BROKEN BY FORCE"; } }] },
               { id: 2, title: "SCANDAL", desc: "Toxic spill detected.", options: [{ label: "HUSH MONEY", action: (s) => { s.cash -= 15; return "SILENCED"; } }, { label: "ADMIT FAULT", action: (s) => { s.stockMultiplier = 0.8; return "STOCK CRASH"; } }] }
           ];
+
+          if (staff.pr) {
+              events.find(e => e.id === 2).options.push({ label: "SPIN NARRATIVE (PR ABILITY)", action: (s) => { return "CRISIS AVERTED VIA PR SPIN"; } });
+          }
+
+          if (staff.cfo) {
+              events.push({ id: 3, title: "FRODE CONTABILE", desc: "La SEC sospetta il CFO di truccare i conti.", options: [{ label: "LICENZIA CFO (-$10M)", action: (s) => { s.cash -= 10; s.fireCFO = true; return "CFO LICENZIATO E MULTA PAGATA"; } }, { label: "COPRI IL CFO (+30% Rischio)", action: (s) => { s.legalRisk += 30; return "INDAGINI INSABBIATE. RISCHIO ALTO"; } }] });
+          }
+          
+          if (staff.coo) {
+              events.push({ id: 4, title: "VIOLAZIONI SICUREZZA", desc: "Il COO forza ritmi massacranti ignorando le norme.", options: [{ label: "LICENZIA COO (+15 Stress)", action: (s) => { s.stress += 15; s.fireCOO = true; return "CAPRO ESPIATORIO SACRIFICATO"; } }, { label: "CORROMPI ISPETTORI (-$15M, +20% Rischio)", action: (s) => { s.cash -= 15; s.legalRisk += 20; return "ISPETTORI CORROTTI"; } }] });
+          }
+
+          if (staff.pr) {
+              events.push({ id: 5, title: "RICATTO AI GIORNALISTI", desc: "Il tuo PR usa fondi neri per insabbiare notizie.", options: [{ label: "LICENZIA PR (Stock -10%)", action: (s) => { s.stockMultiplier = 0.9; s.firePR = true; return "PR LICENZIATO. AZIONI IN CALO"; } }, { label: "NEGA TUTTO (+25% Rischio)", action: (s) => { s.legalRisk += 25; return "L'FBI INIZIA A INDAGARE"; } }] });
+          }
+
           setActiveEvent(events[Math.floor(Math.random() * events.length)]);
       }
 
@@ -574,7 +674,7 @@ const TheSuccessor = () => {
                           <p className="mb-3 leading-relaxed">Build companies from the ground up, take apart businesses piece by piece, and seize every opportunity before anyone else.</p>
                           <p className="mb-3 leading-relaxed">But nothing comes for free: the higher you rise, the greater the pressure.<br/>Stress is constant, authorities start watching you… and one mistake can cost you everything.</p>
                           <p className="mb-3 leading-relaxed">CORPORATE RAIDER SIMULATOR is a strategy game set in the golden age of finance, where ambition and risk go hand in hand.</p>
-                          <p className="mb-6 leading-relaxed">Objective: reach $500 million in net monthly profit and prove that in the game of power… <b>there are no rules, only winners.</b></p>
+                          <p className="mb-6 leading-relaxed"><u>Objective:</u> reach $500 million in net monthly profit and prove that in the game of power… <b>there are no rules, only winners.</b></p>
                           <div className="text-center">
                               <RetroButton onClick={() => setMenuScreen('main')} className="!w-auto inline-block px-8">CHIUDI</RetroButton>
                           </div>
@@ -672,14 +772,14 @@ const TheSuccessor = () => {
             <div className="border-4 border-red-600 p-8 max-w-md w-full bg-[#000080] text-white border-2 border-white border-r-gray-800 border-b-gray-800 shadow-md">
                 <h2 className="text-4xl font-bold mb-4 blink">FATAL ERROR</h2>
                 <p className="text-xl mb-8 uppercase">{legalRisk >= 100 ? "FBI RAID: ARRESTED" : stress >= 100 ? "SIGNAL LOST: CARDIAC ARREST" : "EXCEPTION: INSOLVENCY"}</p>
-                <RetroButton onClick={() => { setScreen('start'); setMenuScreen('main'); }}>REBOOT SYSTEM</RetroButton>
+                <RetroButton onClick={() => window.location.reload()}>REBOOT SYSTEM</RetroButton>
             </div>
         </div>
     );
   }
 
   return (
-      <div className="h-screen bg-[#008080] flex flex-col font-sans text-sm select-none">
+      <div className="h-screen bg-[#008080] flex flex-col font-sans text-sm select-none overflow-hidden">
           <div className="bg-[#c0c0c0] p-1 flex justify-between items-center shrink-0 border-b-2 border-white border-r-gray-800 border-b-gray-800 shadow-md">
               <div className="flex gap-2 font-bold px-2 items-center">
                   <span className="text-[#000080] text-base leading-none uppercase">{companyName || "HOLDING CORP"}</span>
@@ -735,21 +835,72 @@ const TheSuccessor = () => {
                               <RetroButton onClick={nextTurn}><TrendingUp size={14}/> NEXT</RetroButton>
                               <RetroButton onClick={useInsiderTrading} className="text-purple-900"><Skull size={14}/> INTEL</RetroButton>
                           </div>
-                          <div className="flex-1 bg-black border-2 border-gray-600 border-r-white border-b-white p-4 relative flex items-center justify-center overflow-hidden m-1">
-                              {!target ? <div className="text-[#00ff00] text-center font-mono opacity-50 blink"><Building size={48} className="mx-auto mb-2"/><p>AWAITING TARGET...</p></div> : 
-                              <div className="bg-[#c0c0c0] border-2 border-white border-r-gray-800 border-b-gray-800 p-1 w-full max-w-[95%] animate-in zoom-in shadow-md">
-                                  <div className="bg-[#000080] text-white px-2 py-1 font-bold flex justify-between text-xs mb-1"><span>Target Acquired</span><button onClick={()=>setTarget(null)} className="border border-white border-r-gray-500 border-b-gray-500 bg-[#c0c0c0] text-black h-4 w-4 flex items-center justify-center">×</button></div>
-                                  <div className="p-4 text-center">
-                                      <h2 className="text-2xl font-black font-mono mb-2 text-green-900 bg-white border-2 border-gray-600 border-r-white border-b-white p-1 truncate">{target.name}</h2>
-                                      <div className="bg-black border-2 border-gray-600 border-r-white border-b-white p-2 text-left font-mono text-xs text-green-500 mb-3 grid grid-cols-2 gap-1">
-                                          <span>SECTOR:</span><span className="text-right text-white font-bold">{target.sector}</span>
-                                          <span>PRICE:</span><span className="text-right text-white font-bold">${target.price}M</span>
-                                          <span>REV:</span><span className="text-right text-white font-bold">+${target.revenue}M/yr</span>
-                                          <span>OPEX:</span><span className="text-right text-red-500 font-bold">-${(target.revenue * 0.4).toFixed(1)}M/yr</span>
-                                      </div>
-                                      <div className="flex gap-2"><RetroButton onClick={()=>handleBuy('cash')}>CASH MERGER</RetroButton><RetroButton onClick={()=>handleBuy('lbo')}>LBO RAID</RetroButton></div>
+                          <div className="flex-1 bg-black border-2 border-gray-600 border-r-white border-b-white p-2 relative flex flex-col overflow-y-auto m-1">
+                              {!target ? (
+                                  <div className="text-[#00ff00] text-center font-mono opacity-50 blink m-auto">
+                                      <Building size={48} className="mx-auto mb-2"/>
+                                      <p>AWAITING TARGET...</p>
                                   </div>
-                              </div>}
+                              ) : (
+                                  <div className="bg-[#c0c0c0] border-2 border-white border-r-gray-800 border-b-gray-800 p-1 w-full max-w-md m-auto animate-in zoom-in shadow-md">
+                                      <div className="bg-[#000080] text-white px-2 py-1 font-bold flex justify-between text-xs mb-1">
+                                          <span>Target Acquired</span>
+                                          <button onClick={()=>setTarget(null)} className="border border-white border-r-gray-500 border-b-gray-500 bg-[#c0c0c0] text-black h-4 w-4 flex items-center justify-center active:border-black active:border-t-black active:border-l-black">×</button>
+                                      </div>
+                                      <div className="p-2 sm:p-3 text-center bg-black border-2 border-gray-600 m-1 relative overflow-hidden">
+                                          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#00ff00 1px, transparent 1px), linear-gradient(90deg, #00ff00 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                                          
+                                          <div className="text-red-500 font-bold blink text-[9px] sm:text-[10px] mb-2 tracking-widest text-left">[CLASSIFIED ASSET DATA]</div>
+                                          
+                                          <h2 className="text-lg sm:text-xl font-black font-mono mb-2 text-green-400 bg-green-900/30 border border-green-800 p-1 truncate flex items-center justify-center gap-2 relative z-10">
+                                              <Building size={16} /> {target.name}
+                                          </h2>
+                                          
+                                          <div className="flex justify-between items-center mb-3 px-1 relative z-10">
+                                              <span className="text-white text-[9px] sm:text-[10px] font-bold bg-blue-900 px-2 py-0.5 border border-blue-700">{target.sector.toUpperCase()}</span>
+                                              <span className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 border ${target.rating === 'UNDERVALUED' ? 'text-green-400 border-green-700 bg-green-900/50' : target.rating === 'OVERPRICED' ? 'text-red-400 border-red-700 bg-red-900/50' : 'text-gray-300 border-gray-600 bg-gray-800'}`}>
+                                                  {target.rating}
+                                              </span>
+                                          </div>
+
+                                          <div className="text-left font-mono text-[10px] sm:text-xs text-green-500 mb-3 sm:mb-4 space-y-1 relative z-10">
+                                              <div className="flex justify-between border-b border-green-900/50 pb-1">
+                                                  <span className="opacity-70">ASKING PRICE:</span><span className="text-white font-bold">${target.price}M</span>
+                                              </div>
+                                              <div className="flex justify-between border-b border-green-900/50 pb-1 pt-1">
+                                                  <span className="opacity-70">GROSS REVENUE:</span><span className="text-white font-bold">+${target.revenue}M/yr</span>
+                                              </div>
+                                              <div className="flex justify-between border-b border-green-900/50 pb-1 pt-1">
+                                                  <span className="opacity-70">EST. OPEX:</span><span className="text-red-400 font-bold">-${(target.revenue * 0.4).toFixed(1)}M/yr</span>
+                                              </div>
+                                              <div className="flex justify-between pt-1 font-bold text-xs sm:text-sm">
+                                                  <span className="text-green-300">EST. MARGIN:</span>
+                                                  <span className="text-green-400">+${(target.revenue - (target.revenue * 0.4)).toFixed(1)}M/yr</span>
+                                              </div>
+                                          </div>
+                                          
+                                          <div className="grid grid-cols-2 gap-2 relative z-10">
+                                              <button 
+                                                  onClick={()=>handleBuy('cash')} 
+                                                  disabled={cash < target.price}
+                                                  className={`flex flex-col items-center justify-center p-2 border-2 border-white border-r-gray-600 border-b-gray-600 active:border-gray-600 active:border-t-white active:border-l-white ${cash >= target.price ? 'bg-teal-700 text-white hover:bg-teal-600' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                                              >
+                                                  <span className="font-bold text-[10px] sm:text-sm">CASH MERGER</span>
+                                                  <span className="text-[8px] sm:text-[9px] opacity-80 mt-1">CASH LFT: ${(cash - target.price).toFixed(1)}M</span>
+                                              </button>
+
+                                              <button 
+                                                  onClick={()=>handleBuy('lbo')} 
+                                                  disabled={debt + target.price > maxLeverage}
+                                                  className={`flex flex-col items-center justify-center p-2 border-2 border-white border-r-gray-600 border-b-gray-600 active:border-gray-600 active:border-t-white active:border-l-white ${debt + target.price <= maxLeverage ? 'bg-red-800 text-white hover:bg-red-700' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                                              >
+                                                  <span className="font-bold text-[10px] sm:text-sm">LBO RAID</span>
+                                                  <span className="text-[8px] sm:text-[9px] opacity-80 mt-1">NEW DEBT: ${(debt + target.price).toFixed(1)}M</span>
+                                              </button>
+                                          </div>
+                                      </div>
+                                  </div>
+                              )}
                           </div>
                       </div>
                   </Win95Window>
@@ -762,9 +913,13 @@ const TheSuccessor = () => {
 
               {/* DESTRA: Portafoglio Aziende */}
               <aside className="col-span-12 md:col-span-3 flex flex-col gap-2 overflow-hidden min-h-0">
-                  <Win95Window title={`Assets (${companies.length})`} icon={Briefcase} className="h-full">
-                      <div className="bg-white border-2 border-gray-500 border-r-white border-b-white h-full overflow-y-auto p-1 m-1 cursor-pointer relative group" onClick={()=>setShowPortfolioReport(true)} title="Click for Portfolio Report">
-                          <div className="absolute top-1 right-1 text-[9px] text-blue-800 bg-white px-1 border border-blue-800 z-10 hidden group-hover:block">VIEW</div>
+                  <Win95Window 
+                      title={`Assets (${companies.length})`} 
+                      icon={Briefcase} 
+                      className="h-full"
+                      headerRight={<button onClick={()=>setShowPortfolioReport(true)} className="bg-[#c0c0c0] px-2 h-5 text-black text-[10px] font-bold flex items-center justify-center border-2 border-white border-r-black border-b-black active:border-black active:border-t-black active:border-l-black">VIEW</button>}
+                  >
+                      <div className="bg-white border-2 border-gray-500 border-r-white border-b-white h-full overflow-y-auto p-1 m-1 relative">
                           {companies.map((c, i)=>(
                               <div key={c.id} className="hover:bg-blue-800 hover:text-white flex justify-between px-1 text-xs border-b border-dotted border-gray-300 group/row items-center py-1">
                                   <span className="truncate pr-2">{c.name}</span>
@@ -807,9 +962,47 @@ const TheSuccessor = () => {
               <div className="absolute bottom-12 left-2 w-48 z-50">
                   <Win95Window title="SYSTEM" onClose={() => setShowSystemMenu(false)}>
                       <div className="p-2 space-y-1">
-                          <RetroButton onClick={() => { setScreen('start'); setMenuScreen('main'); setShowSystemMenu(false); }}>REBOOT SYSTEM</RetroButton>
-                          <RetroButton onClick={() => alert("Manuale non trovato (Error 404)")}>HELP</RetroButton>
+                          <RetroButton onClick={() => window.location.reload()}>REBOOT SYSTEM</RetroButton>
+                          <RetroButton onClick={() => { setShowHelp(true); setHelpPage(0); setShowSystemMenu(false); }}>HELP</RetroButton>
                           <RetroButton onClick={() => setShowSystemMenu(false)}>CLOSE MENU</RetroButton>
+                      </div>
+                  </Win95Window>
+              </div>
+          )}
+
+          {showHelp && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                  <Win95Window title="OS_GUIDE.CHM" icon={FileText} onClose={() => setShowHelp(false)} className="max-w-md w-full shadow-2xl">
+                      <div className="bg-white p-5 m-1 border-2 border-gray-500 border-r-white border-b-white font-mono text-xs text-black flex flex-col">
+                          <h2 className="text-lg font-bold mb-3 border-b-2 border-black pb-1 text-[#000080]">{helpPages[helpPage].title}</h2>
+                          
+                          <p className="min-h-[100px] whitespace-pre-line leading-relaxed text-sm mb-6 text-gray-800 font-bold">
+                              {helpPages[helpPage].content}
+                          </p>
+                          
+                          <div className="flex justify-between items-center border-t border-gray-400 pt-4 mt-auto">
+                              <RetroButton 
+                                  onClick={() => setHelpPage(p => Math.max(0, p - 1))} 
+                                  disabled={helpPage === 0} 
+                                  className="!w-auto px-4"
+                              >
+                                  &lt; PREV
+                              </RetroButton>
+                              
+                              <span className="font-bold text-gray-600">PAGE {helpPage + 1}/{helpPages.length}</span>
+                              
+                              <RetroButton 
+                                  onClick={() => setHelpPage(p => Math.min(helpPages.length - 1, p + 1))} 
+                                  disabled={helpPage === helpPages.length - 1} 
+                                  className="!w-auto px-4"
+                              >
+                                  NEXT &gt;
+                              </RetroButton>
+                          </div>
+                          
+                          <div className="mt-4 text-center">
+                              <RetroButton onClick={() => setShowHelp(false)}>CLOSE MANUAL</RetroButton>
+                          </div>
                       </div>
                   </Win95Window>
               </div>
@@ -903,8 +1096,8 @@ const TheSuccessor = () => {
 
           {showAdvisor && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                  <Win95Window title="CDA_MEETING.EXE" icon={Sparkles} onClose={() => setShowAdvisor(false)} className="max-w-md w-full">
-                      <div className="p-6 bg-black border-2 border-gray-600 border-r-white border-b-white m-1 text-green-400 font-mono text-sm leading-relaxed">
+                  <Win95Window title="CDA_MEETING.EXE" icon={Sparkles} onClose={() => setShowAdvisor(false)} className="max-w-md w-full shadow-2xl">
+                      <div className="p-6 bg-black border border-gray-700 text-green-400 font-mono text-sm leading-relaxed">
                           <div className="mb-4 border-b border-green-800 pb-2 flex justify-between"><span className="animate-pulse">● SECURE LINE</span><span>v9.0</span></div>
                           {isAdvisorLoading ? <div className="text-center py-8 animate-pulse">CONNECTING...</div> : (
                               <div>
@@ -919,7 +1112,7 @@ const TheSuccessor = () => {
 
           {showFinancials && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-              <Win95Window title="CONSOLIDATED_REPORT.XLS" icon={FileText} onClose={() => setShowFinancials(false)} className="max-w-lg w-full h-3/4">
+              <Win95Window title="CONSOLIDATED_REPORT.XLS" icon={FileText} onClose={() => setShowFinancials(false)} className="max-w-lg w-full shadow-2xl h-3/4">
                  <div className="bg-white h-full overflow-y-auto p-6 m-1 border-2 border-gray-500 border-r-white border-b-white font-mono text-xs text-black">
                     <div className="text-center mb-6 border-b-2 border-black pb-2">
                         <h2 className="text-xl font-bold">CONSOLIDATED INCOME STATEMENT</h2>
@@ -927,7 +1120,13 @@ const TheSuccessor = () => {
                     </div>
                     
                     <div className="mb-6 space-y-1">
-                        <div className="flex justify-between font-bold"><span>Total Revenue</span><span>${financials.totalRevenue.toFixed(2)}M</span></div>
+                        <div className="flex justify-between font-bold"><span>Base Revenue</span><span>${financials.rawRevenue.toFixed(2)}M</span></div>
+                        {financials.cooBonusRevenue > 0 && (
+                            <div className="flex justify-between text-green-700 font-bold"><span>COO Synergy Bonus (+{(financials.cooBonusRevenue / financials.rawRevenue * 100).toFixed(0)}%)</span><span>+${financials.cooBonusRevenue.toFixed(2)}M</span></div>
+                        )}
+                        <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Total Revenue</span><span>${financials.totalRevenue.toFixed(2)}M</span></div>
+
+                        <div className="pt-2"></div>
                         <div className="flex justify-between text-red-800"><span>Cost of Revenue (COGS)</span><span>(${financials.cogs.toFixed(2)}M)</span></div>
                         <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Gross Profit</span><span>${financials.grossProfit.toFixed(2)}M</span></div>
 
@@ -937,7 +1136,10 @@ const TheSuccessor = () => {
                         <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Operating Income (EBIT)</span><span>${financials.ebit.toFixed(2)}M</span></div>
 
                         <div className="pt-2"></div>
-                        <div className="flex justify-between text-red-800"><span>Interest Expense (@ {(currentInterestRate*100).toFixed(1)}%)</span><span>(${financials.monthlyInterest.toFixed(2)}M)</span></div>
+                        <div className="flex justify-between text-red-800"><span>Base Interest (@ {(financials.baseRate*100).toFixed(1)}%)</span><span>(${financials.baseInterest.toFixed(2)}M)</span></div>
+                        {financials.cfoBonusRate > 0 && (
+                            <div className="flex justify-between text-green-700 font-bold"><span>CFO Rate Reduction (-{(financials.cfoBonusRate*100).toFixed(1)}%)</span><span>+${financials.cfoInterestSaved.toFixed(2)}M</span></div>
+                        )}
                         <div className="flex justify-between font-bold border-t border-gray-400 pt-1 mt-1"><span>Income Before Tax (EBT)</span><span>${financials.preTaxIncome.toFixed(2)}M</span></div>
 
                         <div className="pt-2"></div>
@@ -957,7 +1159,7 @@ const TheSuccessor = () => {
 
           {showPortfolioReport && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                  <Win95Window title="PORTFOLIO_ANALYSIS.TXT" icon={TableProperties} onClose={() => setShowPortfolioReport(false)} className="max-w-lg w-full h-3/4">
+                  <Win95Window title="PORTFOLIO_ANALYSIS.TXT" icon={TableProperties} onClose={() => setShowPortfolioReport(false)} className="max-w-lg w-full shadow-2xl h-3/4">
                       <div className="bg-white h-full overflow-y-auto p-6 m-1 border-2 border-gray-500 border-r-white border-b-white font-mono text-xs text-black">
                           <div className="text-center mb-6 border-b-2 border-black pb-2"><h2 className="text-xl font-bold">ASSET REPORT</h2><p>{currentDate}</p></div>
                           <div className="mb-6">
@@ -991,7 +1193,7 @@ const TheSuccessor = () => {
 
           {activeEvent && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                  <Win95Window title="CRITICAL ALERT" icon={AlertTriangle} className="max-w-md w-full">
+                  <Win95Window title="CRITICAL ALERT" icon={AlertTriangle} className="max-w-md w-full shadow-2xl">
                       <div className="p-4 bg-[#c0c0c0] m-1 border-2 border-white border-r-gray-500 border-b-gray-500">
                           <h3 className="text-lg font-bold text-red-900 mb-1">{activeEvent.title}</h3>
                           <p className="text-sm text-black mb-4">{activeEvent.desc}</p>
